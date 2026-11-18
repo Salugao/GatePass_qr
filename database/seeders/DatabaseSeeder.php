@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Hash;
 
 class DatabaseSeeder extends Seeder
 {
@@ -15,11 +16,21 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::factory(10)->create();
+        if (! app()->environment(['local', 'testing'])) {
+            return;
+        }
 
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
-        ]);
+        foreach ([
+            ['name' => 'System Administrator', 'email' => 'admin@gatepassqr.local', 'role' => 'administrator'],
+            ['name' => 'Campus Security', 'email' => 'security@gatepassqr.local', 'role' => 'security'],
+            ['name' => 'Laboratory Personnel', 'email' => 'laboratory@gatepassqr.local', 'role' => 'laboratory'],
+            ['name' => 'Office Personnel', 'email' => 'office@gatepassqr.local', 'role' => 'office'],
+        ] as $account) {
+            User::updateOrCreate(['email' => $account['email']], $account + [
+                'password' => Hash::make('GatePass!2026'),
+                'must_change_password' => true,
+                'is_active' => true,
+            ]);
+        }
     }
 }
